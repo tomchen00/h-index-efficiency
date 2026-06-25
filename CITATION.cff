@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite the paper below."
+title: "Code and data for: Robust but inefficient: the statistical efficiency of threshold bibliometric indices"
+type: software
+authors:
+  - family-names: Chen
+    given-names: Tom
+    affiliation: "Harvard Pilgrim Health Care Institute and Harvard Medical School; Harvard T. H. Chan School of Public Health"
+    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"  # add your ORCID
+license: MIT
+repository-code: "https://github.com/tomchen00/h-index-efficiency"
+date-released: "2026-06-25"
+preferred-citation:
+  type: article
+  title: "Robust but inefficient: the statistical efficiency of threshold bibliometric indices"
+  authors:
+    - family-names: Chen
+      given-names: Tom
+  year: 2026
+  # journal: "Econometrics and Statistics"   # add on acceptance
+  # doi: "10.xxxx/xxxxx"                       # add on acceptance
