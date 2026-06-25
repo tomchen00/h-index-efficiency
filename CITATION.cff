@@ -6,7 +6,7 @@ authors:
   - family-names: Chen
     given-names: Tom
     affiliation: "Harvard Pilgrim Health Care Institute and Harvard Medical School; Harvard T. H. Chan School of Public Health"
-    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"  # add your ORCID
+    orcid: "https://orcid.org/0000-0002-5301-5447"
 license: MIT
 repository-code: "https://github.com/tomchen00/h-index-efficiency"
 date-released: "2026-06-25"
