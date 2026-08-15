@@ -1,7 +1,7 @@
 # Code and data: *Robust but inefficient: the statistical efficiency of threshold bibliometric indices*
 
 This repository contains the code and cached data for the paper. Running the scripts regenerates the
-figures, tables, and the numerical summaries reported in it. It holds nine R scripts (each with a
+figures, tables, and the numerical summaries reported in it. It holds ten R scripts (each with a
 Purpose / Produces / Reads / Requires header), the cached OpenAlex citation-count and publication-year
 data for the six-author illustration, and an output folder for the figures.
 
@@ -26,8 +26,9 @@ data caches live in `data/`. Each script re-creates those folders if your unzip 
 
 | Script | Produces |
 |---|---|
-| `are_simulation.R` | Pareto variance-ratio table and `figures/are_pareto.png`; the geometric (light-tail) contrast |
-| `zeta_corollary_sim.R` | Discrete zeta corollary and `figures/are_zeta.png` |
+| `are_pareto_fig.R` | Table 1 and `figures/are_pareto.png` (simulation, finite-n prediction, and leading rate) |
+| `are_simulation.R` | Pareto variance-ratio tables (alpha = 1 and 2) and the geometric (light-tail) contrast (console) |
+| `zeta_corollary_sim.R` | Discrete zeta corollary and `figures/are_zeta.png` (curves drawn to n = 1e6) |
 | `winsorized_hill_sim.R` | Efficiency-robustness table and `figures/tradeoff_winsor.png`, `figures/single_outlier_influence.png` |
 | `geometric_corollary_sim.R` | Light-tailed (geometric) lattice-degeneracy check (console) |
 | `two_quantity_geometric_check.R` | Sufficiency check: geometric `h` is a function of `(n, C)` (console) |

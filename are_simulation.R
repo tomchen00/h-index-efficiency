@@ -7,7 +7,9 @@
 #   shrink toward zero as n grows; also shows the light-tailed geometric case
 #   where H_n is lattice-degenerate (the boundary of the phenomenon).
 #
-# Produces : figures/are_pareto.png; prints the Pareto variance-ratio table to the console
+# Produces : console tables (Pareto variance ratios; geometric contrast). Figure 1 and the paper's
+#            Table 1 are produced by are_pareto_fig.R, whose simulation block replicates the
+#            alpha = 1 block below draw for draw.
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
 # Run      : from the supplement root --  Rscript are_simulation.R
@@ -65,16 +67,4 @@ geo_tab <- do.call(rbind, lapply(c(50,100,200,500,1000,2000,5000),
                                  function(n) geom_run(n, q=0.2, B=8000)))
 print(geo_tab, row.names=FALSE)
 
-## ---- figure: Pareto variance ratio -> 0 ----
-fig <- "figures/are_pareto.png"
-png(fig, width=1500, height=1100, res=200)
-ns <- c(100,300,1000,3000,10000)
-emp <- par_tab$VarRatio; theo <- par_tab$VarRatio_theory
-plot(ns, emp, log="xy", type="b", pch=19, col="#2D5A3D", lwd=2,
-     xlab="n (papers)", ylab=expression(Var(hat(h))/Var(H[n])),
-     main="Pareto citations: variance ratio by sample size")
-lines(ns, theo, type="b", pch=1, lty=2, col="#C2453E", lwd=2)
-legend("topright", c("empirical (simulation)","theory  ~ n^{-1/2} log^2 n"),
-       col=c("#2D5A3D","#C2453E"), pch=c(19,1), lty=c(1,2), lwd=2, bty="n")
-dev.off()
-cat("\nfigure saved:", fig, "\n")
+cat("\nFigure 1 and the paper's Table 1 are produced by are_pareto_fig.R.\n")

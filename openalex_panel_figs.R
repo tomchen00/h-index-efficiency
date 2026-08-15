@@ -11,19 +11,16 @@
 # Reads    : data/authors_data.rds, data/panel_summary.rds, data/family_fits.rds, data/burr_boot.rds
 # Requires : ggplot2, tidyr, fitdistrplus, actuar  (CRAN packages)
 # Run      : from the supplement root --  Rscript openalex_panel_figs.R
+# Seed     : none needed (deterministic given the caches)
 # ======================================================================
 
-## ensure output folders exist (some zip extractors drop empty dirs)
-for (d_ in c("data","figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
+for (d_ in c("figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
 
-# Figures from the cached OpenAlex panel + family fits (no re-pull, no bootstrap).
 suppressMessages({library(ggplot2); library(tidyr); library(fitdistrplus); library(actuar)})
-DD <- "data"
-FIG <- "figures"
-A  <- readRDS(file.path(DD,"authors_data.rds"))
-S  <- readRDS(file.path(DD,"panel_summary.rds"))   # Pareto plug-in bootstrap ratios
-FF <- readRDS(file.path(DD,"family_fits.rds"))     # KS + h_model per family
-BB <- readRDS(file.path(DD,"burr_boot.rds"))       # Burr bootstrap calibration gap + var ratio
+A  <- readRDS("data/authors_data.rds")
+S  <- readRDS("data/panel_summary.rds")   # Pareto plug-in bootstrap ratios
+FF <- readRDS("data/family_fits.rds")     # KS + h_model per family
+BB <- readRDS("data/burr_boot.rds")       # Burr bootstrap calibration gap + var ratio
 
 # ---- (1) log-log survival: empirical + fitted Pareto (poor) + fitted Burr (good) ----
 sd <- do.call(rbind, lapply(names(A), function(fld){
@@ -37,17 +34,15 @@ sd <- do.call(rbind, lapply(names(A), function(fld){
 sl <- pivot_longer(sd, c(emp,par,bur), names_to="curve", values_to="S")
 sl$curve <- factor(sl$curve, levels=c("emp","par","bur"),
                    labels=c("empirical","fitted Pareto","fitted Burr"))
-p1 <- ggplot(sl, aes(cites, S, colour=curve, linetype=curve)) + geom_line(linewidth=0.7) +
+p1 <- ggplot(sl, aes(cites, S, colour=curve, linetype=curve)) + geom_line(linewidth=0.6) +
   scale_x_log10() + scale_y_log10() +
-  scale_colour_manual(values=c("empirical"="#333333","fitted Pareto"="#C2453E","fitted Burr"="#2D5A3D"),name=NULL)+
+  scale_colour_manual(values=c("empirical"="#1A1A1A","fitted Pareto"="#D55E00","fitted Burr"="#0072B2"),name=NULL)+
   scale_linetype_manual(values=c("empirical"=1,"fitted Pareto"=2,"fitted Burr"=3),name=NULL)+
   facet_wrap(~field, scales="free") +
-  labs(x="citations (log)", y="survival P(X >= x) (log)",
-       title="OpenAlex citation survival with Pareto and Burr fits",
-       subtitle="Empirical survival, fitted Pareto, and fitted Burr on log-log axes") +
+  labs(x="citations", y=expression(P(X>=x))) +
   theme_minimal(base_size=10) + theme(legend.position="top",
-                                      plot.margin=margin(6, 8, 8, 8))
-ggsave(file.path(FIG,"openalex_loglog.png"), p1, width=8.4, height=5.6, dpi=150)
+                                      plot.margin=margin(6, 8, 6, 8))
+ggsave("figures/openalex_loglog.png", p1, width=8.0, height=5.2, dpi=150)
 
 # ---- (2) calibration-variance: absolute relative deviation |h_model-H|/H vs bootstrap variance ratio ----
 bv <- rbind(
@@ -58,16 +53,14 @@ bv <- rbind(
              relbias=abs(BB$bias_Burr)/BB$H, vratio=BB$ratio_Burr))
 mn <- aggregate(cbind(relbias,vratio)~est, bv, mean)
 p2 <- ggplot(bv, aes(relbias, vratio, colour=est)) +
-  geom_point(alpha=0.45, size=2) +
-  geom_point(data=mn, size=5, shape=18) +
-  geom_hline(yintercept=1, linetype=3, colour="grey60") +
-  scale_colour_manual(values=c("empirical H"="#4477AA","Pareto plug-in"="#C2453E","Burr plug-in"="#2D5A3D"),name=NULL)+
-  labs(x="absolute relative deviation from realized h-index  |h_model - H| / H",
-       y="bootstrap variance ratio vs empirical H",
-       title="Calibration and bootstrap variance ratio on OpenAlex records",
-       subtitle="Author-level points and field means for empirical, Pareto, and Burr indices") +
+  geom_point(alpha=0.55, size=1.8) +
+  geom_point(data=mn, size=3.6, shape=18) +
+  geom_hline(yintercept=1, linetype=3, colour="grey60", linewidth=0.4) +
+  scale_colour_manual(values=c("empirical H"="#1A1A1A","Pareto plug-in"="#D55E00","Burr plug-in"="#0072B2"),name=NULL)+
+  labs(x="absolute relative deviation from realized h-index",
+       y="bootstrap variance ratio vs empirical H") +
   theme_minimal(base_size=11) + theme(legend.position="top",
-                                      plot.margin=margin(6, 8, 8, 8))
-ggsave(file.path(FIG,"openalex_biasvar.png"), p2, width=7.4, height=4.8, dpi=150)
+                                      plot.margin=margin(6, 8, 6, 8))
+ggsave("figures/openalex_biasvar.png", p2, width=6.8, height=4.4, dpi=150)
 
 cat("Wrote openalex_loglog.png (with Burr) and openalex_biasvar.png\n")
