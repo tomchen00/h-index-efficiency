@@ -14,16 +14,11 @@
 # Seed     : set.seed(1729) (all stochastic scripts use this seed)
 # ======================================================================
 
-## ensure output folders exist (some zip extractors drop empty dirs)
-for (d_ in c("data","figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
+for (d_ in c("figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
 
-# =====================================================================
-# Winsorized-Hill robustified h-index plug-in: efficiency-robustness trade-off.
 # Known-scale Pareto: Y=log X ~ Exp(alpha). Winsorize W=min(Y,c).
 #   g(a;c)=E[min(Y,c)] = (1/a)(1-e^{-ac});  solve g(a_c;c)=mean(W) for a_c (Fisher-consistent).
 #   h_c = n^{1/(1+a_c)}.  Compare to empirical H_n and raw plug-in (c=Inf).
-# Trade-off: clean-model efficiency vs robustness under epsilon-contamination.
-# =====================================================================
 suppressMessages(library(ggplot2))
 set.seed(1729)
 
@@ -98,39 +93,34 @@ tradeoff <- function(alpha=1, n=1000, qs=c(.90,.95,.975,.99), eps=0.05, cfac=1e6
 df <- tradeoff()
 
 figdir <- "figures"
-# Each estimator is called out in the legend (no on-graph text labels). The winsorized
-# family is ordered raw -> q.99 -> q.975 -> q.95 -> q.90 -> empirical so the dashed path
-# traces the frontier from most-efficient/least-robust to least-efficient/most-robust.
+# Winsorized family is ordered by q, so it takes a sequential blue ramp (dark = heavier cap);
+# raw plug-in = vermillion; empirical H = black. Shapes double-encode identity.
 lev <- c("raw plug-in","winsor q=0.99","winsor q=0.975","winsor q=0.95","winsor q=0.9","empirical H")
 df$estimator <- factor(df$estimator, levels=lev)
 df$kind <- ifelse(grepl("winsor",as.character(df$estimator)),"winsorized",as.character(df$estimator))
 pathdf <- df[order(df$estimator), ]
 pathdf <- pathdf[pathdf$kind=="winsorized", ]
-cols <- c("raw plug-in"="#C2453E","winsor q=0.99"="#8C6D1F","winsor q=0.975"="#B08A2E",
-          "winsor q=0.95"="#5E8C61","winsor q=0.9"="#2D5A3D","empirical H"="#4477AA")
+cols <- c("raw plug-in"="#D55E00","winsor q=0.99"="#6BAED6","winsor q=0.975"="#4292C6",
+          "winsor q=0.95"="#2171B5","winsor q=0.9"="#08306B","empirical H"="#1A1A1A")
 shp  <- c("raw plug-in"=15,"winsor q=0.99"=17,"winsor q=0.975"=17,
           "winsor q=0.95"=17,"winsor q=0.9"=17,"empirical H"=19)
 p <- ggplot(df, aes(contam_rmse, clean_rmse)) +
-  geom_path(data=pathdf, aes(group=1), colour="grey55", linewidth=0.7, linetype=2) +
-  geom_point(aes(colour=estimator, shape=estimator), size=3.6) +
-  scale_colour_manual(values=cols, name="Estimator", drop=FALSE) +
-  scale_shape_manual(values=shp, name="Estimator", drop=FALSE) +
-  labs(x="RMSE under 5% inflated-outlier contamination  (robustness; lower = better)",
-       y="RMSE at clean model  (efficiency; lower = better)",
-       title="Clean and contaminated RMSE for winsorized-Hill plug-ins",
-       subtitle="Pareto alpha=1, n=1000. Dashed path: winsorized family from raw plug-in to empirical H.") +
+  geom_path(data=pathdf, aes(group=1), colour="grey60", linewidth=0.6, linetype=2) +
+  geom_point(aes(colour=estimator, shape=estimator), size=2.4) +
+  scale_colour_manual(values=cols, name=NULL, drop=FALSE) +
+  scale_shape_manual(values=shp, name=NULL, drop=FALSE) +
+  labs(x="RMSE under 5% inflated-outlier contamination",
+       y="RMSE at clean model") +
   theme_minimal(base_size=11) +
-  theme(legend.position="bottom", legend.key.height=grid::unit(1.1,"lines"),
-        plot.subtitle=element_text(size=9),
-        plot.margin=margin(6, 8, 8, 8))
-ggsave(file.path(figdir,"tradeoff_winsor.png"), p, width=7.4, height=4.6, dpi=150)
+  theme(legend.position="bottom", legend.key.height=grid::unit(1.0,"lines"),
+        plot.margin=margin(6, 8, 6, 8))
+ggsave(file.path(figdir,"tradeoff_winsor.png"), p, width=6.8, height=4.2, dpi=150)
 cat("\nWrote figure:", file.path(figdir,"tradeoff_winsor.png"),"\n")
 
 # ---------- single-outlier influence: one mis-recorded paper of growing magnitude ----------
-# Illustrates Prop 2: replacing ONE paper's count by a contaminant of magnitude M moves the empirical
-# H_n by at most one (bounded influence, gamma* finite per record), while the raw plug-in is dragged
-# without bound (IF ~ log M), and a winsorized plug-in stays bounded. This is the regime where the
-# empirical index is optimally robust (complementary to the 5%-mass-contamination frontier above).
+# Replacing one paper's count by a contaminant of magnitude M moves the empirical H_n by at
+# most one (bounded influence), drags the raw plug-in without bound (IF ~ log M), and leaves
+# a winsorized plug-in bounded.
 single_outlier <- function(alpha=1, n=1000, B=8000, mags=10^(0:9), qwin=0.95){
   out <- data.frame()
   for (M in mags){
@@ -155,22 +145,21 @@ cat(sprintf("\n=== single-outlier influence (alpha=1, n=1000): mean change in in
 print(reshape(so, idvar="M", timevar="estimator", direction="wide"), row.names=FALSE)
 
 so$estimator <- factor(so$estimator, levels=c("raw plug-in","winsor q=0.95","empirical H"))
-cols2 <- c("raw plug-in"="#C2453E","winsor q=0.95"="#5E8C61","empirical H"="#4477AA")
-ps <- ggplot(so, aes(M, mean_dev, colour=estimator)) +
-  geom_hline(yintercept=1, linetype=3, colour="grey60") +
-  geom_line(linewidth=0.9) + geom_point(size=2.4) +
+cols2 <- c("raw plug-in"="#D55E00","winsor q=0.95"="#0072B2","empirical H"="#1A1A1A")
+lty2  <- c("raw plug-in"=1,"winsor q=0.95"=5,"empirical H"=1)
+ps <- ggplot(so, aes(M, mean_dev, colour=estimator, linetype=estimator)) +
+  geom_hline(yintercept=1, linetype=3, colour="grey60", linewidth=0.4) +
+  geom_line(linewidth=0.7) + geom_point(size=1.6, show.legend=FALSE) +
   scale_x_log10(breaks=10^(0:9),
                 labels=expression(10^0,10^1,10^2,10^3,10^4,10^5,10^6,10^7,10^8,10^9)) +
-  scale_colour_manual(values=cols2, name="Estimator") +
-  annotate("text", x=10^1.2, y=1.25, label="bounded by 1", size=3, colour="grey45", hjust=0) +
-  labs(x="citations of the single mis-recorded paper  (log scale)",
-       y="mean change in the index",
-       title="One mis-recorded paper: mean index change by citation count",
-       subtitle="Pareto alpha=1, n=1000; empirical H, raw plug-in, and winsorized plug-in") +
+  scale_colour_manual(values=cols2, name=NULL) +
+  scale_linetype_manual(values=lty2, name=NULL) +
+  annotate("text", x=10^1.2, y=1.35, label="bounded by 1", size=2.8, colour="grey40", hjust=0) +
+  labs(x="citations of the single mis-recorded paper",
+       y="mean change in the index") +
   theme_minimal(base_size=11) +
-  theme(legend.position="bottom", plot.subtitle=element_text(size=9),
-        plot.margin=margin(6, 8, 8, 8))
-ggsave(file.path(figdir,"single_outlier_influence.png"), ps, width=7.0, height=4.4, dpi=150)
+  theme(legend.position="top", plot.margin=margin(6, 8, 6, 8))
+ggsave(file.path(figdir,"single_outlier_influence.png"), ps, width=6.6, height=4.0, dpi=150)
 cat("\nWrote figure:", file.path(figdir,"single_outlier_influence.png"),"\n")
 
 # analytic gross-error sensitivity + ARE across cap c (alpha=1)
