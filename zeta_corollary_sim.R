@@ -108,17 +108,17 @@ grid$ratio_ref <- sapply(ngrid, function(n){
 suppressMessages(library(ggplot2))
 df <- res1
 p <- ggplot() +
-  geom_line(data=grid, aes(n, ratio_th, colour="Corollary 1 leading rate"), linewidth=0.8, linetype=2) +
+  geom_line(data=grid, aes(n, ratio_th, colour="Leading rate (Corollary 3)"), linewidth=0.8, linetype=2) +
   geom_line(data=grid, aes(n, ratio_ref, colour="Finite-n prediction"), linewidth=0.9) +
   geom_point(data=df, aes(n, ratio_sim, colour="Simulation"), size=2.2) +
   scale_x_log10(breaks=10^(2:6), labels=expression(10^2,10^3,10^4,10^5,10^6)) +
-  scale_colour_manual(values=c("Corollary 1 leading rate"="grey55","Finite-n prediction"="#0072B2",
+  scale_colour_manual(values=c("Leading rate (Corollary 3)"="grey55","Finite-n prediction"="#0072B2",
                                "Simulation"="#1A1A1A"), name=NULL,
-                      breaks=c("Simulation","Finite-n prediction","Corollary 1 leading rate")) +
+                      breaks=c("Simulation","Finite-n prediction","Leading rate (Corollary 3)")) +
   guides(colour=guide_legend(override.aes=list(
     linetype=c(NA,1,2), shape=c(16,NA,NA), linewidth=c(NA,0.9,0.8)))) +
   labs(x="n (papers)", y=expression(Var(hat(h)[n])/Var(H[n]))) +
   theme_minimal(base_size=11) + theme(legend.position="top",
                                       plot.margin=margin(6, 8, 6, 8))
-ggsave("figures/are_zeta.png", p, width=6.2, height=4.0, dpi=150)
+ggsave("figures/are_zeta.png", p, width=6.2, height=4.0, dpi=600)
 cat("\nWrote figures/are_zeta.png\nDONE.\n")

@@ -114,7 +114,7 @@ p <- ggplot(df, aes(contam_rmse, clean_rmse)) +
   theme_minimal(base_size=11) +
   theme(legend.position="bottom", legend.key.height=grid::unit(1.0,"lines"),
         plot.margin=margin(6, 8, 6, 8))
-ggsave(file.path(figdir,"tradeoff_winsor.png"), p, width=6.8, height=4.2, dpi=150)
+ggsave(file.path(figdir,"tradeoff_winsor.png"), p, width=6.8, height=4.2, dpi=600)
 cat("\nWrote figure:", file.path(figdir,"tradeoff_winsor.png"),"\n")
 
 # ---------- single-outlier influence: one mis-recorded paper of growing magnitude ----------
@@ -159,7 +159,7 @@ ps <- ggplot(so, aes(M, mean_dev, colour=estimator, linetype=estimator)) +
        y="mean change in the index") +
   theme_minimal(base_size=11) +
   theme(legend.position="top", plot.margin=margin(6, 8, 6, 8))
-ggsave(file.path(figdir,"single_outlier_influence.png"), ps, width=6.6, height=4.0, dpi=150)
+ggsave(file.path(figdir,"single_outlier_influence.png"), ps, width=6.6, height=4.0, dpi=600)
 cat("\nWrote figure:", file.path(figdir,"single_outlier_influence.png"),"\n")
 
 # analytic gross-error sensitivity + ARE across cap c (alpha=1)

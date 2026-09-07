@@ -102,5 +102,5 @@ p <- ggplot() +
   labs(x="n (papers)", y=expression(Var(hat(h)[n])/Var(H[n]))) +
   theme_minimal(base_size=11) + theme(legend.position="top",
                                       plot.margin=margin(6, 8, 6, 8))
-ggsave("figures/are_pareto.png", p, width=6.2, height=4.0, dpi=150)
+ggsave("figures/are_pareto.png", p, width=6.2, height=4.0, dpi=600)
 cat("\nWrote figures/are_pareto.png\nDONE.\n")

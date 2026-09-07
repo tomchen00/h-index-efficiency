@@ -1,7 +1,7 @@
 # Code and data: *Robust but inefficient: the statistical efficiency of threshold bibliometric indices*
 
 This repository contains the code and cached data for the paper. Running the scripts regenerates the
-figures, tables, and the numerical summaries reported in it. It holds ten R scripts (each with a
+figures, tables, and the numerical summaries reported in it. It holds twelve R scripts (each with a
 Purpose / Produces / Reads / Requires header), the cached OpenAlex citation-count and publication-year
 data for the six-author illustration, and an output folder for the figures.
 
@@ -35,13 +35,22 @@ data caches live in `data/`. Each script re-creates those folders if your unzip 
 
 **B. OpenAlex illustration** (run in order; later steps read earlier caches):
 
-1. `openalex_panel.R`: fetches the six authors and writes `data/authors_data.rds`, `data/panel_summary.rds`.
+1. `openalex_panel.R`: fetches the six authors and writes `data/authors_data.rds`, `data/panel_summary.rds`
+   (empirical index, Pareto and winsorized plug-ins, bootstrap variance ratios; Table 3, first columns).
    The caches are shipped, so this step is optional; it re-pulls only if `data/authors_data.rds` is missing.
-2. `fit_families_full.R`: fits the tail families, writes `data/family_fits.rds`.
-3. `fit_families_boot.R`: Burr bootstrap, writes `data/burr_boot.rds` (B = 4000; the most time-consuming step).
-4. `openalex_panel_figs.R`: writes `figures/openalex_loglog.png`, `figures/openalex_biasvar.png`.
+2. `fit_families_conditional.R`: left-truncated maximum-likelihood fits of the tail families to the cited
+   papers, two-sided KS distances, model-implied indices from the conditional crossing, and the conditional
+   Burr bootstrap (B = 4000; the most time-consuming step). Writes `data/family_fits_conditional.rds`
+   (Table 4) and `data/burr_boot_conditional.rds` (Burr variance ratios in Table 3).
+3. `openalex_panel_figs_conditional.R`: writes `figures/openalex_loglog.png`, `figures/openalex_biasvar.png`
+   from the conditional caches.
 
-Because the four `.rds` caches are included, you can run step 4 directly to regenerate the OpenAlex-based
+The earlier unconditional pipeline is kept for comparison and is not used for any reported number:
+`fit_families_full.R` (writes `data/family_fits.rds`), `fit_families_boot.R` (writes `data/burr_boot.rds`),
+and `openalex_panel_figs.R` (the same two figures from those caches). Step 2 reads the unconditional caches
+only to print them beside the conditional results.
+
+Because the `.rds` caches are included, you can run step 3 directly to regenerate the OpenAlex-based
 figures without internet or the refits.
 
 ## Reproducibility
@@ -51,8 +60,8 @@ figures without internet or the refits.
 - `data/authors_data.rds` is the raw OpenAlex pull (`cited_by_count`, `publication_year`) for the six
   authors in the paper, retrieved from the public API (`api.openalex.org`) on 6 June 2026. Re-pulling later
   gives different counts as citations accrue; the cache preserves the OpenAlex snapshot used in the paper.
-- `data/{panel_summary, family_fits, burr_boot}.rds` are derived caches; delete them to recompute from
-  `authors_data.rds`.
+- `data/{panel_summary, family_fits_conditional, burr_boot_conditional, family_fits, burr_boot}.rds` are
+  derived caches; delete them to recompute from `authors_data.rds`.
 - `openalex_panel.R` sends a placeholder contact email (`anonymous@example.org`) to OpenAlex's polite pool;
   replace it with your own address if you re-run the fetch. It is not needed for the cached run.
 
@@ -60,11 +69,13 @@ figures without internet or the refits.
 
 ```
 README.md
-*.R                      nine scripts (each opens with a Purpose / Produces / Reads / Requires header)
-data/  authors_data.rds  raw OpenAlex pull (six authors)
-       panel_summary.rds  per-author empirical/plug-in summary and bootstrap variance ratios
-       family_fits.rds    KS distance and model-implied h per tail family
-       burr_boot.rds      Burr bootstrap calibration gap and variance ratio
+*.R                      twelve scripts (each opens with a Purpose / Produces / Reads / Requires header)
+data/  authors_data.rds             raw OpenAlex pull (six authors)
+       panel_summary.rds            per-author empirical/plug-in summary and bootstrap variance ratios
+       family_fits_conditional.rds  KS distance and model-implied h per tail family, conditional fits (Table 4)
+       burr_boot_conditional.rds    conditional Burr bootstrap: calibration gap and variance ratio (Table 3)
+       family_fits.rds              earlier unconditional fits (comparison only)
+       burr_boot.rds                earlier unconditional Burr bootstrap (comparison only)
 figures/                 output folder (figures are written here)
 ```
 
