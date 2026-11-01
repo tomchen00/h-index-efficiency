@@ -7,8 +7,8 @@
 #   shrink toward zero as n grows; also shows the light-tailed geometric case
 #   where H_n is lattice-degenerate (the boundary of the phenomenon).
 #
-# Produces : console tables (Pareto variance ratios; geometric contrast). Figure 1 and the paper's
-#            Table 1 are produced by are_pareto_fig.R, whose simulation block replicates the
+# Produces : console tables (Pareto variance ratios; geometric contrast). Supplementary
+#            Table S2 and Figure S1 are produced by are_pareto_fig.R, whose simulation block replicates the
 #            alpha = 1 block below draw for draw.
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
@@ -67,4 +67,4 @@ geo_tab <- do.call(rbind, lapply(c(50,100,200,500,1000,2000,5000),
                                  function(n) geom_run(n, q=0.2, B=8000)))
 print(geo_tab, row.names=FALSE)
 
-cat("\nFigure 1 and the paper's Table 1 are produced by are_pareto_fig.R.\n")
+cat("\nSupplementary Table S2 and Figure S1 are produced by are_pareto_fig.R.\n")

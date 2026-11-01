@@ -95,22 +95,25 @@ df <- tradeoff()
 figdir <- "figures"
 # Winsorized family is ordered by q, so it takes a sequential blue ramp (dark = heavier cap);
 # raw plug-in = vermillion; empirical H = black. Shapes double-encode identity.
-lev <- c("raw plug-in","winsor q=0.99","winsor q=0.975","winsor q=0.95","winsor q=0.9","empirical H")
+lev <- c("raw plug-in","winsor q=0.99","winsor q=0.975","winsor q=0.95","winsor q=0.9","empirical H")  # lint-ok: F02 internal level; legend text set by labels=
 df$estimator <- factor(df$estimator, levels=lev)
 df$kind <- ifelse(grepl("winsor",as.character(df$estimator)),"winsorized",as.character(df$estimator))
 pathdf <- df[order(df$estimator), ]
 pathdf <- pathdf[pathdf$kind=="winsorized", ]
 cols <- c("raw plug-in"="#D55E00","winsor q=0.99"="#6BAED6","winsor q=0.975"="#4292C6",
-          "winsor q=0.95"="#2171B5","winsor q=0.9"="#08306B","empirical H"="#1A1A1A")
-shp  <- c("raw plug-in"=15,"winsor q=0.99"=17,"winsor q=0.975"=17,
-          "winsor q=0.95"=17,"winsor q=0.9"=17,"empirical H"=19)
+          "winsor q=0.95"="#2171B5","winsor q=0.9"="#08306B","empirical H"="#1A1A1A")  # lint-ok: F02 internal level; legend text set by labels=
+shp  <- c("raw plug-in"=15,"winsor q=0.99"=17,"winsor q=0.975"=17,  # lint-ok: F02 internal level; legend text set by labels=
+          "winsor q=0.95"=17,"winsor q=0.9"=17,"empirical H"=19)  # lint-ok: F02 internal level; legend text set by labels=
+lab_tr <- c(expression("uncapped plug-in"), expression("winsorized," ~ italic(q) == "0.99"),
+            expression("winsorized," ~ italic(q) == "0.975"), expression("winsorized," ~ italic(q) == "0.95"),
+            expression("winsorized," ~ italic(q) == "0.90"), expression("empirical" ~ italic(H)[italic(n)]))
 p <- ggplot(df, aes(contam_rmse, clean_rmse)) +
   geom_path(data=pathdf, aes(group=1), colour="grey60", linewidth=0.6, linetype=2) +
   geom_point(aes(colour=estimator, shape=estimator), size=2.4) +
-  scale_colour_manual(values=cols, name=NULL, drop=FALSE) +
-  scale_shape_manual(values=shp, name=NULL, drop=FALSE) +
-  labs(x="RMSE under 5% inflated-outlier contamination",
-       y="RMSE at clean model") +
+  scale_colour_manual(values=cols, breaks=lev, labels=lab_tr, name=NULL, drop=FALSE) +
+  scale_shape_manual(values=shp, breaks=lev, labels=lab_tr, name=NULL, drop=FALSE) +
+  guides(colour=guide_legend(nrow=2, byrow=TRUE), shape=guide_legend(nrow=2, byrow=TRUE)) +
+  labs(x="contaminated-sample RMSE", y="clean-sample RMSE") +
   theme_minimal(base_size=11) +
   theme(legend.position="bottom", legend.key.height=grid::unit(1.0,"lines"),
         plot.margin=margin(6, 8, 6, 8))
@@ -144,19 +147,21 @@ so <- single_outlier()
 cat(sprintf("\n=== single-outlier influence (alpha=1, n=1000): mean change in index vs contaminant M ===\n"))
 print(reshape(so, idvar="M", timevar="estimator", direction="wide"), row.names=FALSE)
 
-so$estimator <- factor(so$estimator, levels=c("raw plug-in","winsor q=0.95","empirical H"))
-cols2 <- c("raw plug-in"="#D55E00","winsor q=0.95"="#0072B2","empirical H"="#1A1A1A")
-lty2  <- c("raw plug-in"=1,"winsor q=0.95"=5,"empirical H"=1)
+so$estimator <- factor(so$estimator, levels=c("raw plug-in","winsor q=0.95","empirical H"))  # lint-ok: F02 internal level; legend text set by labels=
+cols2 <- c("raw plug-in"="#D55E00","winsor q=0.95"="#0072B2","empirical H"="#1A1A1A")  # lint-ok: F02 internal level; legend text set by labels=
+lty2  <- c("raw plug-in"=1,"winsor q=0.95"=5,"empirical H"=1)  # lint-ok: F02 internal level; legend text set by labels=
+lab_so <- c(expression("Pareto plug-in"), expression("winsorized plug-in," ~ italic(q) == "0.95"),
+            expression("empirical index" ~ italic(H)[italic(n)]))
 ps <- ggplot(so, aes(M, mean_dev, colour=estimator, linetype=estimator)) +
   geom_hline(yintercept=1, linetype=3, colour="grey60", linewidth=0.4) +
   geom_line(linewidth=0.7) + geom_point(size=1.6, show.legend=FALSE) +
   scale_x_log10(breaks=10^(0:9),
                 labels=expression(10^0,10^1,10^2,10^3,10^4,10^5,10^6,10^7,10^8,10^9)) +
-  scale_colour_manual(values=cols2, name=NULL) +
-  scale_linetype_manual(values=lty2, name=NULL) +
-  annotate("text", x=10^1.2, y=1.35, label="bounded by 1", size=2.8, colour="grey40", hjust=0) +
-  labs(x="citations of the single mis-recorded paper",
-       y="mean change in the index") +
+  scale_colour_manual(values=cols2, labels=lab_so, name=NULL) +
+  scale_linetype_manual(values=lty2, labels=lab_so, name=NULL) +
+  annotate("text", x=1, y=1.04, label="bound~of~Proposition~2~'for'~italic(H)[italic(n)]", parse=TRUE,
+           size=2.8, colour="grey40", hjust=0, vjust=0) +
+  labs(x=expression("replacement count" ~ italic(M)), y="mean change in the estimate") +
   theme_minimal(base_size=11) +
   theme(legend.position="top", plot.margin=margin(6, 8, 6, 8))
 ggsave(file.path(figdir,"single_outlier_influence.png"), ps, width=6.6, height=4.0, dpi=600)
