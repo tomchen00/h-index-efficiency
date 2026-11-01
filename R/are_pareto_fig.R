@@ -2,15 +2,15 @@
 # are_pareto_fig.R
 #
 # Purpose  :
-#   Table 1 and Figure 1 of the paper. Simulates the Pareto (alpha = 1)
+#   Supplementary Table S2 and Figure S1. Simulates the Pareto (alpha = 1)
 #   variance ratio Var(plug-in)/Var(H_n) at B = 8000 replicates, computes the
 #   finite-n prediction (delta-method variance over the binomial-law Var(H_n))
 #   and the Theorem 1 leading rate on a dense n-grid, and plots all three.
 #   The simulation block replicates the alpha = 1 block of are_simulation.R
-#   draw for draw (same seed, same order), so the printed table equals the
-#   paper's Table 1 exactly.
+#   draw for draw (same seed, same order), so the printed table equals
+#   Supplementary Table S2 exactly.
 #
-# Produces : figures/are_pareto.png; prints Table 1 and the finite-n check to the console
+# Produces : figures/are_pareto.png; prints Supplementary Table S2 and the finite-n check to the console
 # Reads    : nothing (self-contained simulation)
 # Requires : ggplot2  (CRAN package)
 # Run      : from the supplement root --  Rscript are_pareto_fig.R
@@ -43,7 +43,7 @@ pareto_run <- function(n, alpha, B){
 }
 
 ns <- c(100,300,1000,3000,10000)
-cat("=== Pareto alpha=1, B=8000 (this output is the paper's Table 1) ===\n")
+cat("=== Pareto alpha=1, B=8000 (this output is Supplementary Table S2) ===\n")
 par_tab <- do.call(rbind, lapply(ns, function(n) pareto_run(n, alpha=1, B=8000)))
 print(par_tab, row.names=FALSE)
 
@@ -90,16 +90,17 @@ stopifnot(max(abs(fin$exEH - par_tab$EH)/par_tab$EH) < 0.02)
 suppressMessages(library(ggplot2))
 df <- data.frame(n=ns, ratio_sim=par_tab$VarRatio)
 p <- ggplot() +
-  geom_line(data=grid, aes(n, ratio_th, colour="Theorem 1 leading rate"), linewidth=0.8, linetype=2) +
-  geom_line(data=grid, aes(n, ratio_ref, colour="Finite-n prediction"), linewidth=0.9) +
-  geom_point(data=df, aes(n, ratio_sim, colour="Simulation"), size=2.2) +
+  geom_line(data=grid, aes(n, ratio_th, colour="lead"), linewidth=0.8, linetype=2) +
+  geom_line(data=grid, aes(n, ratio_ref, colour="delta"), linewidth=0.9) +
+  geom_point(data=df, aes(n, ratio_sim, colour="sim"), size=2.2) +
   scale_x_log10(breaks=c(100,300,1000,3000,10000), labels=c("100","300","1000","3000","10000")) +
-  scale_colour_manual(values=c("Theorem 1 leading rate"="grey55","Finite-n prediction"="#0072B2",
-                               "Simulation"="#1A1A1A"), name=NULL,
-                      breaks=c("Simulation","Finite-n prediction","Theorem 1 leading rate")) +
+  scale_colour_manual(values=c(lead="grey55", delta="#0072B2", sim="#1A1A1A"), name=NULL,
+                      breaks=c("sim","delta","lead"),
+                      labels=c("simulation", "first-order delta method", "leading term of Theorem 1")) +
   guides(colour=guide_legend(override.aes=list(
     linetype=c(NA,1,2), shape=c(16,NA,NA), linewidth=c(NA,0.9,0.8)))) +
-  labs(x="n (papers)", y=expression(Var(hat(h)[n])/Var(H[n]))) +
+  labs(x=expression("number of papers" ~ italic(n)),
+       y=expression(Var(hat(italic(h))[italic(n)])/Var(italic(H)[italic(n)]))) +
   theme_minimal(base_size=11) + theme(legend.position="top",
                                       plot.margin=margin(6, 8, 6, 8))
 ggsave("figures/are_pareto.png", p, width=6.2, height=4.0, dpi=600)

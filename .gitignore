@@ -1,7 +1,7 @@
+# application data: candidate-level records contain personal data; never commit
+data/asn/
+# raw simulation output and cluster logs
+data/sim/raw/
+logs/
 .Rhistory
 .RData
-.Rproj.user/
-*.Rout
-*.aux
-*.log
-.DS_Store
