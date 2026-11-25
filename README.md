@@ -22,8 +22,6 @@ figures/    figures of the paper as vector PDFs (scripts write here)
 - For figure labels typeset as in the paper, the package `xdvir` and a TeX installation; without them
   `R/theme_manuscript.R` falls back to plain-text labels.
 - Python 3 with `pandas` (part C only).
-- Part B, step 2 runs on a SLURM cluster; the partition names in `R/sim_run.sbatch`, `R/sim_submit.sh` and
-  `R/sim_driver.sh` are placeholders to adapt to your site.
 
 ## A. Theory simulations (self-contained; no data files, no internet)
 
@@ -45,9 +43,10 @@ the cached output in `data/supp/` in seconds. All figure scripts use the house s
 
 1. `R/sim_calibrate.R`: calibrated parameters of the eight distributions and the scenario list
    (`data/sim/calibration.csv`, Supplementary Table S5; `data/sim/cells.csv`).
-2. `R/sim_run.R`, submitted with `bash R/sim_submit.sh <array-range>` (`R/sim_run.sbatch`; `R/sim_driver.sh`
-   runs the stopping rule): one task per (scenario, block of 150 groups, called fields in the code), written to `data/sim/raw/`
-   (not included).
+2. `Rscript R/sim_run.R <scenario> <block>`: one task per scenario and block of 150 groups (called fields in
+   the code), written to `data/sim/raw/` (not included). We ran the tasks in parallel, in rounds: after each
+   round, step 3 lists in `data/sim/tasklist_next.txt` the scenarios that need another block, up to four
+   blocks (600 groups).
 3. `R/sim_aggregate.R`: mean squared error ratios, Monte Carlo standard errors and the stopping rule
    (`data/sim/results.rds`, `data/sim/summary.csv`; a diagnostic plot
    `figures/sim_mse_ratio_diagnostic.png`).
