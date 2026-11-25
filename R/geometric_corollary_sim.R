@@ -9,8 +9,8 @@
 # Produces : console diagnostics (no figure)
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
-# Run      : from the supplement root --  Rscript geometric_corollary_sim.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Run      : from the repository root -- Rscript R/geometric_corollary_sim.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 # =====================================================================

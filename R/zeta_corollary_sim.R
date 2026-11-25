@@ -11,11 +11,11 @@
 #   c'(s)/c(s)) that vanish for the Pareto (c = 1), so its asymptote is
 #   approached more slowly.
 #
-# Produces : figures/are_zeta.png; console output
+# Produces : figures/are_zeta.pdf (Supplementary Figure S2); console output
 # Reads    : nothing (self-contained simulation)
-# Requires : VGAM, ggplot2  (CRAN packages)
-# Run      : from the supplement root --  Rscript zeta_corollary_sim.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Requires : VGAM, ggplot2 >= 4.0, ragg, R/theme_manuscript.R  (CRAN packages)
+# Run      : from the repository root -- Rscript R/zeta_corollary_sim.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 for (d_ in c("figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
@@ -105,22 +105,7 @@ grid$ratio_ref <- sapply(ngrid, function(n){
   (dh^2 / (n * Vs)) / exactVarH2(n)
 })
 
-suppressMessages(library(ggplot2))
-df <- res1
-p <- ggplot() +
-  geom_line(data=grid, aes(n, ratio_th, colour="lead"), linewidth=0.8, linetype=2) +
-  geom_line(data=grid, aes(n, ratio_ref, colour="finite"), linewidth=0.9) +
-  geom_point(data=df, aes(n, ratio_sim, colour="sim"), size=2.2) +
-  scale_x_log10(breaks=10^(2:6), labels=expression(10^2,10^3,10^4,10^5,10^6)) +
-  scale_colour_manual(values=c(lead="grey55", finite="#0072B2", sim="#1A1A1A"), name=NULL,
-                      breaks=c("sim","finite","lead"),
-                      labels=c(expression("simulation"), expression("finite-" * italic(n) ~ "prediction"),
-                               expression("leading term of Corollary S1"))) +
-  guides(colour=guide_legend(override.aes=list(
-    linetype=c(NA,1,2), shape=c(16,NA,NA), linewidth=c(NA,0.9,0.8)))) +
-  labs(x=expression("number of papers" ~ italic(n)),
-       y=expression(Var(hat(italic(h))[italic(n)])/Var(italic(H)[italic(n)]))) +
-  theme_minimal(base_size=11) + theme(legend.position="top",
-                                      plot.margin=margin(6, 8, 6, 8))
-ggsave("figures/are_zeta.png", p, width=6.2, height=4.0, dpi=600)
-cat("\nWrote figures/are_zeta.png\nDONE.\n")
+dir.create("data/supp", recursive = TRUE, showWarnings = FALSE)
+saveRDS(list(grid = grid, res1 = res1), "data/supp/zeta_corollary.rds")   # everything the figure needs
+source("R/zeta_corollary_plot.R")
+cat("\nDONE.\n")

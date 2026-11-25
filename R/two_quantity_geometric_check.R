@@ -9,8 +9,8 @@
 # Produces : console check (no figure)
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
-# Run      : from the supplement root --  Rscript two_quantity_geometric_check.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Run      : from the repository root -- Rscript R/two_quantity_geometric_check.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 # Geometric citations X ~ Geom(q) on {0,1,2,...}: P(X=x)=q(1-q)^x, S(h)=(1-q)^h.

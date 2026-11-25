@@ -10,11 +10,11 @@
 #   fitted to Lomax data conditional on X >= 1, which is misspecified: its
 #   pseudo-true tail index is 1/(2 log 2) rather than 1.
 #
-# Produces : data/hill_weissman_sim.rds; console table
+# Produces : data/hill_weissman_sim.rds; console table (Supplementary Table S4)
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
-# Run      : from the supplement root --  Rscript hill_weissman_sim.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Run      : from the repository root -- Rscript R/hill_weissman_sim.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 for (d_ in c("data")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
