@@ -14,10 +14,10 @@
 #   Also prints the exact threshold probabilities quoted in Sections 1-2:
 #   P(H_n >= t) = P{Bin(n, S(t)) >= t} and P{Bin(n, t/n) >= t}.
 #
-# Produces : figures/crossing.png; prints the numbers to the console
+# Produces : figures/crossing.pdf; prints the numbers to the console
 # Reads    : nothing (self-contained simulation)
-# Requires : base R (grDevices with cairo)
-# Run      : from the supplement root --  Rscript R/crossing_fig.R
+# Requires : ggplot2 >= 4.0, patchwork, ragg; R/theme_manuscript.R (xdvir and TeX for typeset labels)
+# Run      : from the repository root -- Rscript R/crossing_fig.R
 # Seed     : set.seed(1729)
 # ======================================================================
 
@@ -39,43 +39,69 @@ cat(sprintf("Var(H_n) = %.3f, Var(plug-in) = %.3f, ratio = %.3f\n", var(H), var(
 X <- first; Hx <- hindex(X); ax <- n / sum(log(X)); hx <- n^(1 / (1 + ax))
 cat(sprintf("Panel (a) record: H_n = %d, alpha_hat = %.3f, plug-in = %.2f\n", Hx, ax, hx))
 
-col_fit <- "#B03A2E"
-png("figures/crossing.png", width = 7.2, height = 3.3, units = "in", res = 300, type = "cairo")
-par(mfrow = c(1, 2), mar = c(3.6, 3.8, 1.6, 0.6), mgp = c(2.3, 0.7, 0), las = 1, cex = 0.8)
+# ---- figure (house style: R/theme_manuscript.R) ----------------------------------------------------------------
+source("R/theme_manuscript.R")
+suppressPackageStartupMessages(library(patchwork))
+k <- ms_col
+math <- function(x, y, tex, plotmath, colour = k[["ink"]], hjust = 0, vjust = 0.5) {
+  if (ms_latex) annotate("latex", x = x, y = y, label = tex, colour = colour, hjust = hjust, vjust = vjust)
+  else annotate("text", x = x, y = y, label = plotmath, parse = TRUE, colour = colour, hjust = hjust, vjust = vjust,
+                family = ms_serif, size = ms_text_size)
+}
 
+# (a) one record
 R <- 26; xs <- sort(X, decreasing = TRUE)[1:R]
-plot(1:R, pmin(xs, 30), pch = 16, cex = 0.6, col = "grey35", xlim = c(0, R), ylim = c(0, 30),
-     xlab = expression("rank" ~ italic(r)), ylab = "citations")
-title(main = "(a) one record", font.main = 1, cex.main = 1, adj = 0)
-abline(0, 1, lty = 3)
+pts <- data.frame(r = 1:R, y = pmin(xs, 30))
 rr <- seq(0.5, R, length.out = 400)
-lines(rr, (n / rr)^(1 / alpha), lwd = 1.8)
-lines(rr, (n / rr)^(1 / ax), lwd = 1.8, lty = 2, col = col_fit)
-points(hn, hn, pch = 1, cex = 1.4, lwd = 1.6)
-points(hx, hx, pch = 2, cex = 1.2, lwd = 1.6, col = col_fit)
-segments(Hx, 0, Hx, Hx, col = "grey35")
-text(Hx, 1.3, bquote(italic(H)[italic(n)] == .(Hx)), pos = 4, col = "grey20")
-segments(hn, hn, 7, 4.2, col = "grey40"); text(5.4, 3.2, bquote(italic(h)[italic(n)] == 10), pos = 4)
-segments(hx, hx, 13.5, 22, col = col_fit)
-text(13.5, 22, bquote(hat(italic(h))[italic(n)] == .(sprintf("%.1f", hx))), pos = 4, col = col_fit)
-legend("topright", bty = "n", cex = 0.85,
-       legend = c("ranked citation counts", "population curve", "fitted Pareto curve", "diagonal"),
-       lty = c(NA, 1, 2, 3), pch = c(16, NA, NA, NA), col = c("grey35", "black", col_fit, "black"),
-       lwd = c(NA, 1.8, 1.8, 1))
+lev <- c("ranked citation counts", "population curve", "fitted Pareto curve", "diagonal")
+cur <- rbind(data.frame(r = rr, y = (n / rr)^(1 / alpha), what = lev[2]),
+             data.frame(r = rr, y = (n / rr)^(1 / ax), what = lev[3]))
+diag_df <- data.frame(r = c(0, 30), y = c(0, 30), what = lev[4])
+col_a <- setNames(c(k[["note"]], k[["ink"]], k[["red"]], k[["muted"]]), lev)
+lty_a <- setNames(c("blank", "solid", "dashed", "dotted"), lev)
+pa <- ggplot(mapping = aes(r, y, colour = what, linetype = what)) +
+  geom_line(data = diag_df, linewidth = 0.45) +
+  geom_line(data = cur) +
+  geom_point(data = transform(pts, what = lev[1]), size = 1.1, show.legend = c(colour = TRUE, linetype = FALSE)) +
+  annotate("segment", x = Hx, xend = Hx, y = 0, yend = Hx, colour = k[["note"]], linewidth = 0.35) +
+  annotate("point", x = hn, y = hn, shape = 21, fill = k[["paper"]], colour = k[["ink"]], size = 2.4, stroke = 0.7) +
+  annotate("point", x = hx, y = hx, shape = 24, fill = k[["paper"]], colour = k[["red"]], size = 2.1, stroke = 0.7) +
+  math(Hx + 0.4, 1.4, sprintf("$H_n=%d$", Hx), sprintf("italic(H)[italic(n)]==%d", Hx), colour = k[["note"]]) +
+  annotate("segment", x = hn - 0.4, y = hn - 0.6, xend = 7.4, yend = 4.4, colour = k[["muted"]], linewidth = 0.3) +
+  math(7.3, 3.6, "$h_n=10$", "italic(h)[italic(n)]==10", hjust = 1) +
+  annotate("segment", x = hx + 0.5, y = hx + 0.8, xend = 15.2, yend = 15.4, colour = k[["red"]], linewidth = 0.3) +
+  math(15.4, 15.9, sprintf("$\\hat h_n=%.1f$", hx), sprintf("hat(italic(h))[italic(n)]==%.1f", hx),
+       colour = k[["red"]]) +
+  scale_colour_manual(values = col_a, breaks = lev) + scale_linetype_manual(values = lty_a, breaks = lev) +
+  scale_x_continuous(breaks = seq(0, 25, 5)) + scale_y_continuous(breaks = seq(0, 30, 10)) +
+  coord_cartesian(xlim = c(0, R), ylim = c(0, 30), expand = FALSE) +
+  labs(title = "(a) 1 record", x = "rank $r$", y = "citations") +
+  theme_manuscript() + legend_inside(0.98, 0.98) +
+  guides(colour = guide_legend(override.aes = list(shape = c(16, NA, NA, NA), linetype = unname(lty_a))),
+         linetype = "none")
 
+# (b) 8000 records
 hb <- hist(H, breaks = seq(min(H) - 0.5, max(H) + 0.5, by = 1), plot = FALSE)
-plot(NA, xlim = c(4, 17), ylim = c(0, 0.42), xlab = expression("estimate of" ~ italic(h)[italic(n)]),
-     ylab = "density")
-title(main = sprintf("(b) %d records", B), font.main = 1, cex.main = 1, adj = 0)
-rect(hb$breaks[-length(hb$breaks)] + 0.08, 0, hb$breaks[-1] - 0.08, hb$counts / B, col = "grey80", border = NA)
-d <- density(hh, adjust = 1.2); lines(d$x, d$y, lwd = 1.8, col = col_fit)
-abline(v = hn, lty = 3)
-legend("topright", bty = "n", cex = 0.85,
-       legend = c(bquote(italic(H)[italic(n)] * ", variance" ~ .(sprintf("%.2f", var(H)))),
-                  bquote(hat(italic(h))[italic(n)] * ", variance" ~ .(sprintf("%.2f", var(hh)))),
-                  bquote(italic(h)[italic(n)] == 10)),
-       fill = c("grey80", NA, NA), border = NA, lty = c(NA, 1, 3), col = c(NA, col_fit, "black"), lwd = c(NA, 1.8, 1))
-invisible(dev.off())
+bars <- data.frame(xmin = hb$breaks[-length(hb$breaks)] + 0.08, xmax = hb$breaks[-1] - 0.08, ymax = hb$counts / B)
+d <- density(hh, adjust = 1.2); dens <- data.frame(x = d$x, y = d$y)
+dens <- dens[dens$x >= 4 & dens$x <= 17, ]
+ytop <- max(bars$ymax)
+pb <- ggplot() +
+  geom_rect(data = bars, aes(xmin = xmin, xmax = xmax, ymin = 0, ymax = ymax), fill = "#D9D9D9") +
+  geom_line(data = dens, aes(x, y), colour = k[["red"]]) +
+  annotate("segment", x = hn, xend = hn, y = 0, yend = 0.40, colour = k[["muted"]], linetype = "dotted", linewidth = 0.45) +
+  math(hn + 0.25, 0.405, "$h_n=10$", "italic(h)[italic(n)]==10", vjust = 0) +
+  math(4.3, 0.31, sprintf("$H_n$, variance %.2f", var(H)), sprintf("italic(H)[italic(n)]*', variance %.2f'", var(H)),
+       colour = k[["note"]]) +
+  math(11.9, 0.25, sprintf("$\\hat h_n$, variance %.2f", var(hh)),
+       sprintf("hat(italic(h))[italic(n)]*', variance %.2f'", var(hh)), colour = k[["red"]]) +
+  scale_x_continuous(breaks = seq(4, 16, 2)) +
+  scale_y_continuous(breaks = seq(0, 0.4, 0.1), labels = c("0", "0.1", "0.2", "0.3", "0.4")) +
+  coord_cartesian(xlim = c(4, 17), ylim = c(0, 0.44), expand = FALSE) +
+  labs(title = sprintf("(b) %d records", B), x = "estimate of $h_n$", y = "density") +
+  theme_manuscript()
+
+ms_save("figures/crossing.pdf", pa + pb + plot_layout(widths = c(1, 1)), width = 7.2, height = 3.1)
 
 cat("\nExact P(H_n >= t), Pareto alpha = 1, n = 100:\n")
 for (t in 7:13) cat(sprintf("  t = %2d: %.4f\n", t, pbinom(t - 1, n, t^(-alpha), lower.tail = FALSE)))
@@ -85,3 +111,17 @@ cat(sprintf("P(7 <= H_n <= 12) = %.4f; P(H_n <= 9) = %.4f\n",
 cat("\nP{Bin(n, t/n) >= t}:\n")
 for (nt in list(c(16, 7), c(100, 10)))
   cat(sprintf("  n = %3d, t = %2d: %.4f\n", nt[1], nt[2], pbinom(nt[2] - 1, nt[1], nt[2] / nt[1], lower.tail = FALSE)))
+
+# Section 2, plug-in pass probabilities (continuous Pareto, n = 100, threshold t = 10).
+# hat h_n = n^{1/(1 + hat alpha)} >= t iff hat alpha <= log n / log t - 1 iff sum log X >= n / (log n / log t - 1),
+# with sum log X ~ Gamma(n, rate alpha); the empirical rule passes with P{Bin(n, t^-alpha) >= t}.
+cat("\nPass probabilities at t = 10, n = 100:\n")
+cat(sprintf("  h_n = 10 (alpha = 1): empirical %.4f, plug-in %.4f\n",
+            pbinom(9, n, 10^-alpha, lower.tail = FALSE), pgamma(n, shape = n, rate = alpha, lower.tail = FALSE)))
+for (h in c(9, 11)) {
+  a <- log(n) / log(h) - 1                      # alpha giving h_n = h at n = 100
+  pH <- pbinom(9, n, 10^(-a), lower.tail = FALSE)
+  pP <- pgamma(n, shape = n, rate = a, lower.tail = FALSE)
+  err <- if (h < 10) c(pH, pP) else c(1 - pH, 1 - pP)
+  cat(sprintf("  h_n = %d (alpha = %.3f): error empirical %.3f, plug-in %.3f\n", h, a, err[1], err[2]))
+}

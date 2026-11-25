@@ -12,8 +12,8 @@
 #            alpha = 1 block below draw for draw.
 # Reads    : nothing (self-contained simulation)
 # Requires : base R only
-# Run      : from the supplement root --  Rscript are_simulation.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Run      : from the repository root -- Rscript R/are_simulation.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 ## ensure output folders exist (some zip extractors drop empty dirs)

@@ -7,7 +7,7 @@
 #            person clusters; agreement between the OpenAlex index and the official indicator; and
 #            sensitivity to the treatment of deadline-year citations.
 # Reads    : data/asn/derived/asn_estimates_{prorata,lower,upper}.rds
-# Produces : data/asn/derived/asn_summary.rds and printed tables
+# Produces : data/asn/derived/asn_summary.rds and printed tables (Table 4, Supplementary Table S6)
 # Run      : from the repository root -- Rscript R/asn_summarize.R
 # Seed     : set.seed(20260930) for the cluster bootstrap (B = 2000)
 # ======================================================================

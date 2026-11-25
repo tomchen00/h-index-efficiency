@@ -10,11 +10,11 @@
 #   draw for draw (same seed, same order), so the printed table equals
 #   Supplementary Table S2 exactly.
 #
-# Produces : figures/are_pareto.png; prints Supplementary Table S2 and the finite-n check to the console
+# Produces : figures/are_pareto.pdf; prints Supplementary Table S2 and the finite-n check to the console
 # Reads    : nothing (self-contained simulation)
-# Requires : ggplot2  (CRAN package)
-# Run      : from the supplement root --  Rscript are_pareto_fig.R
-# Seed     : set.seed(1729) (all stochastic scripts use this seed)
+# Requires : ggplot2 >= 4.0, ragg; R/theme_manuscript.R (xdvir and TeX for typeset labels)
+# Run      : from the repository root -- Rscript R/are_pareto_fig.R
+# Seed     : set.seed(1729)
 # ======================================================================
 
 for (d_ in c("figures")) if (!dir.exists(d_)) dir.create(d_, showWarnings=FALSE)
@@ -87,21 +87,7 @@ print(transform(fin, exEH=round(exEH,2), exVarH=round(exVarH,3), ratio_ref=signi
 stopifnot(max(abs(fin$exVarH - par_tab$VarH)/par_tab$VarH) < 0.10)
 stopifnot(max(abs(fin$exEH - par_tab$EH)/par_tab$EH) < 0.02)
 
-suppressMessages(library(ggplot2))
-df <- data.frame(n=ns, ratio_sim=par_tab$VarRatio)
-p <- ggplot() +
-  geom_line(data=grid, aes(n, ratio_th, colour="lead"), linewidth=0.8, linetype=2) +
-  geom_line(data=grid, aes(n, ratio_ref, colour="delta"), linewidth=0.9) +
-  geom_point(data=df, aes(n, ratio_sim, colour="sim"), size=2.2) +
-  scale_x_log10(breaks=c(100,300,1000,3000,10000), labels=c("100","300","1000","3000","10000")) +
-  scale_colour_manual(values=c(lead="grey55", delta="#0072B2", sim="#1A1A1A"), name=NULL,
-                      breaks=c("sim","delta","lead"),
-                      labels=c("simulation", "first-order delta method", "leading term of Theorem 1")) +
-  guides(colour=guide_legend(override.aes=list(
-    linetype=c(NA,1,2), shape=c(16,NA,NA), linewidth=c(NA,0.9,0.8)))) +
-  labs(x=expression("number of papers" ~ italic(n)),
-       y=expression(Var(hat(italic(h))[italic(n)])/Var(italic(H)[italic(n)]))) +
-  theme_minimal(base_size=11) + theme(legend.position="top",
-                                      plot.margin=margin(6, 8, 6, 8))
-ggsave("figures/are_pareto.png", p, width=6.2, height=4.0, dpi=600)
-cat("\nWrote figures/are_pareto.png\nDONE.\n")
+dir.create("data/supp", recursive = TRUE, showWarnings = FALSE)
+saveRDS(list(grid = grid, ns = ns, par_tab = par_tab), "data/supp/are_pareto.rds")   # everything the figure needs
+source("R/are_pareto_plot.R")
+cat("\nDONE.\n")

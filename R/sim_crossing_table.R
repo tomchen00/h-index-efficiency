@@ -2,7 +2,7 @@
 # sim_crossing_table.R
 #
 # Purpose  :
-#   Table 2 of the paper: record size n at which the mean squared error
+#   Table 2 of the paper: record length n at which the mean squared error
 #   ratio MSE(T)/MSE(H_n) of an estimator first rises above one, by
 #   citation distribution, in the short setting on the balanced grid.
 #   Uses the operational ratio (undefined fits replaced by H_n) and the
@@ -13,7 +13,7 @@
 # Produces : data/sim/crossing_table.txt (LaTeX rows); prints them
 # Reads    : data/sim/summary.csv
 # Requires : base R
-# Run      : from the supplement root --  Rscript R/sim_crossing_table.R
+# Run      : from the repository root -- Rscript R/sim_crossing_table.R
 # ======================================================================
 
 s <- read.csv("data/sim/summary.csv", stringsAsFactors = FALSE)

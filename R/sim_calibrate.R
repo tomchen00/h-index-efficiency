@@ -23,7 +23,7 @@
 #   P(X = 0), q50, q90, q90/q50 and tail index; checks that every targeted
 #   quantity is met to 1e-6 and writes the deterministic cell table.
 #
-# Produces : data/sim/calibration.csv, data/sim/cells.csv; console table
+# Produces : data/sim/calibration.csv (Supplementary Table S5), data/sim/cells.csv; console table
 # Reads    : R/sim_common.R
 # Requires : base R
 # Run      : from the repository root --  Rscript R/sim_calibrate.R
