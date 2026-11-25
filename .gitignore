@@ -1,6 +1,6 @@
 # application data: candidate-level records contain personal data; never commit
 data/asn/
-# raw simulation output and cluster logs
+# raw simulation output and logs
 data/sim/raw/
 logs/
 .Rhistory
