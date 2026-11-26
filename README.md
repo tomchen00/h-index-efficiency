@@ -78,6 +78,8 @@ Then run, in order:
 6. `Rscript R/asn_summarize.R`: Table 4 and Supplementary Table S6.
 7. `Rscript R/asn_noise_floor.R`: decision stability under resampling of a candidate's papers, the
    uniform-noise benchmark and the exact binomial rule (Section 6.2, Section 7, Supplementary Section S7).
+8. `Rscript R/asn_calibration_targets.R`: the two calibration targets of the simulation study, the median
+   of $H_n/n$ and of the sample-quantile ratio $q_{90}/q_{50}$ over the applications (Section 5.1, Supplementary Table S5).
 
 OpenAlex citation counts grow over time; the paper used responses retrieved in September 2026, so a new
 retrieval gives slightly different numbers. The indicator table contains candidate names, and the derived
