@@ -58,7 +58,7 @@ cat(sprintf("records with n <= 16: undecided %.3f\n", mean((!cert_pass & !cert_f
 sink()
 cat(readLines(out), sep = "\n")
 
-# (4) at H_n = t: upper-tail features of the applications the pooled Burr XII plug-in moves to fail vs keeps (Section 6).
+# (4) at H_n = t: upper-tail features of the applications the pooled Burr XII plug-in moves to fail vs keeps (Section 6.2).
 t <- A$S3; m0 <- A$H == t
 mv <- m0 & A$pass_H & !A$pass_Burrpool; st <- m0 & A$pass_Burrpool
 f <- function(sel, fun) median(vapply(which(sel), function(u) fun(X[[u]], t[u], A$n[u]), 0), na.rm = TRUE)
